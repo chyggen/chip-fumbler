@@ -7,7 +7,7 @@ from chromosome import Chromosome
 
 
 class Agent:
-    
+
     # Create an agent based on a chromosome
     def __init__(self, chromosome: Chromosome):
         self.chromosome = chromosome
@@ -18,4 +18,5 @@ class Agent:
         pass
 
     # Get the agent's underlying chromosome
-    def get_chromosome() -> Chromosome:
+    def get_chromosome(self) -> Chromosome:
+        return self.chromosome

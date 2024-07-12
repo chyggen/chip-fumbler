@@ -1,7 +1,9 @@
 # Simulate a game with multiple agents, will make use of texasholdem game object
 #
+import itertools
 from typing import Tuple
 from texasholdem.game.game import TexasHoldEm
+
 from agent import Agent
 
 
@@ -57,3 +59,22 @@ def round_robin(agents: list[Agent]) -> dict[Agent, float]:
     Returns:
         a dict containing a score for each agent.
     """
+
+    # initialize a dict to store agent scores in 
+    scores = {agent: 0 for agent in agents}
+
+    # generate all possible agent pairs
+    agent_pairs = list(itertools.combinations(agents, 2))
+
+    for (A0, A1) in agent_pairs:
+        (winner, score) = simulation_1v1(A0, A1)
+        if winner == 0:
+            scores[A0] += score
+            scores[A1] -= score
+        else:
+            scores[A0] -= score
+            scores[A1] += score
+
+    # finally, sort scores in descending order
+    sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    return sorted_scores

@@ -14,7 +14,28 @@ SMALL_BLIND = 0
 MAX_PLAYERS = 2
 
 
-def simulation_1v1(A0: Agent, A1: Agent, game_log: bool = False) -> Tuple[int, float]:
+def scoring(method: str, winner: int, game: TexasHoldEm) -> float:
+    """Defines how the agents are scored
+
+    Args:
+        method: The method used for scoring
+        winner: The index of the agent who won
+        game: The texasholdem game object
+
+    Returns:
+        a score
+    """
+    if method == "wins":
+        return 1
+    elif method == "chips per hand":
+        return BUY_IN / game.num_hands
+    else:
+        raise ValueError("Invalid scoring method")
+
+
+def simulation_1v1(
+    A0: Agent, A1: Agent, game_log: bool = False, scoring_method: str = "wins"
+) -> Tuple[int, float]:
     """Runs a 1v1 simulation between two agents
 
     Args:
@@ -46,11 +67,13 @@ def simulation_1v1(A0: Agent, A1: Agent, game_log: bool = False) -> Tuple[int, f
     # When we arrive here, the game is over.
     # We can determine who won by checking the active players in the pot:
     winner = list(game.in_pot_iter(game.btn_loc + 1))[0]
-    chips_per_hand = BUY_IN / game.num_hands
-    return(winner, chips_per_hand)
+    score = scoring(method=scoring_method, winner=winner, game=game)
+    return (winner, score)
 
 
-def round_robin(agents: list[Agent]) -> dict[Agent, float]:
+def round_robin(
+    agents: list[Agent], scoring_method: str = "wins"
+) -> dict[Agent, float]:
     """Runs a round-robin tournament between a list of agents.
 
     Args:
@@ -60,14 +83,14 @@ def round_robin(agents: list[Agent]) -> dict[Agent, float]:
         a dict containing a score for each agent.
     """
 
-    # initialize a dict to store agent scores in 
+    # initialize a dict to store agent scores in
     scores = {agent: 0 for agent in agents}
 
     # generate all possible agent pairs
     agent_pairs = list(itertools.combinations(agents, 2))
 
-    for (A0, A1) in agent_pairs:
-        (winner, score) = simulation_1v1(A0, A1)
+    for A0, A1 in agent_pairs:
+        (winner, score) = simulation_1v1(A0, A1, scoring_method=scoring_method)
         if winner == 0:
             scores[A0] += score
             scores[A1] -= score
@@ -75,6 +98,4 @@ def round_robin(agents: list[Agent]) -> dict[Agent, float]:
             scores[A0] -= score
             scores[A1] += score
 
-    # finally, sort scores in descending order
-    sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
-    return sorted_scores
+    return scores

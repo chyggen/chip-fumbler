@@ -3,6 +3,7 @@ import numpy as np
 import logging
 import os
 from datetime import datetime
+import argparse
 
 # Function to set up logging
 def setup_logging():
@@ -59,9 +60,17 @@ def run_genetic_algorithm(chromosome_length, population_size, num_generations, n
 if __name__ == "__main__":
     setup_logging()
 
-    CHROMOSOME_LENGTH = 30 
-    POPULATION_SIZE = 30  
-    NUM_GENERATIONS = 100  
-    NUM_PARENTS_MATING = 10  
+    parser = argparse.ArgumentParser(description="Run a genetic algorithm.")
+    parser.add_argument('--chromosome_length', type=int, default=10)
+    parser.add_argument('--population_size', type=int, default=100)
+    parser.add_argument('--num_generations', type=int, default=100)
+    parser.add_argument('--num_parents_mating', type=int, default=20)
+
+    args = parser.parse_args()
+
+    CHROMOSOME_LENGTH = args.chromosome_length
+    POPULATION_SIZE = args.population_size
+    NUM_GENERATIONS = args.num_generations
+    NUM_PARENTS_MATING = args.num_parents_mating
 
     run_genetic_algorithm(CHROMOSOME_LENGTH, POPULATION_SIZE, NUM_GENERATIONS, NUM_PARENTS_MATING)

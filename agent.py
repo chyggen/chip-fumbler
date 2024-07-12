@@ -15,14 +15,24 @@ class Agent:
 
     # Decide the next move based on the game state and the agent's chromosome
     # Returns the action to take, plus a number of chips if the action is a raise
-    def action(
-        self, game: TexasHoldEm, random: bool = False
-    ) -> Tuple[ActionType, Optional[int]]:
-        if random:
-            return random_agent(game)
-        else:
-            pass
+    def action(self, game: TexasHoldEm) -> Tuple[ActionType, Optional[int]]:
+        pass
 
     # Get the agent's underlying chromosome
     def get_chromosome(self) -> Chromosome:
         return self.chromosome
+
+
+# A child class that makes random moves, used for testing
+class RandomAgent(Agent):
+    def __init__(self, id):
+        # since random agents do not have a chromosome, they need an ID to be 
+        # differentiable from other random agents
+        self.id = id
+        pass
+
+    def action(self, game: TexasHoldEm) -> Tuple[ActionType, Optional[int]]:
+        return random_agent(game)
+
+    def get_chromosome(self) -> None:
+        return None

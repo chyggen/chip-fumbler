@@ -58,9 +58,9 @@ def simulation_1v1(
         game.start_hand()
         while game.is_hand_running():
             if game.current_player == 0:
-                game.take_action(*A0.action(game, random=True))
+                game.take_action(*A0.action(game))
             else:
-                game.take_action(*A1.action(game, random=True))
+                game.take_action(*A1.action(game))
         if game_log:
             game.export_history("./pgns")  # save history
 
@@ -72,12 +72,14 @@ def simulation_1v1(
 
 
 def round_robin(
-    agents: list[Agent], scoring_method: str = "wins"
+    agents: list[Agent], cycles: int = 1, scoring_method: str = "wins"
 ) -> dict[Agent, float]:
     """Runs a round-robin tournament between a list of agents.
 
     Args:
         agents: a list of agents to enter into the tournament
+        cycles: how many matches each agent plays against every other agent
+        scoring_method: a string specifying how game scores are determined.
 
     Returns:
         a dict containing a score for each agent.
@@ -89,13 +91,14 @@ def round_robin(
     # generate all possible agent pairs
     agent_pairs = list(itertools.combinations(agents, 2))
 
-    for A0, A1 in agent_pairs:
-        (winner, score) = simulation_1v1(A0, A1, scoring_method=scoring_method)
-        if winner == 0:
-            scores[A0] += score
-            scores[A1] -= score
-        else:
-            scores[A0] -= score
-            scores[A1] += score
+    for _ in range(cycles):
+        for A0, A1 in agent_pairs:
+            (winner, score) = simulation_1v1(A0, A1, scoring_method=scoring_method)
+            if winner == 0:
+                scores[A0] += score
+                scores[A1] -= score
+            else:
+                scores[A0] -= score
+                scores[A1] += score
 
     return scores

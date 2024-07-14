@@ -61,10 +61,10 @@ if __name__ == "__main__":
     setup_logging()
 
     parser = argparse.ArgumentParser(description="Run a genetic algorithm.")
-    parser.add_argument('--chromosome_length', type=int, default=10)
-    parser.add_argument('--population_size', type=int, default=100)
-    parser.add_argument('--num_generations', type=int, default=100)
-    parser.add_argument('--num_parents_mating', type=int, default=20)
+    parser.add_argument('-l', '--chromosome_length', type=int, default=10, help="Length of the chromosome")
+    parser.add_argument('-p', '--population_size', type=int, default=100, help="Size of the population")
+    parser.add_argument('-n', '--num_generations', type=int, default=100, help="Number of generations")
+    parser.add_argument('-m', '--num_parents_mating', type=int, default=20, help="Number of parents mating")
 
     args = parser.parse_args()
 

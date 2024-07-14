@@ -29,6 +29,8 @@ def on_generation(ga_instance):
 
 # Runs the genetic algorithm
 def run_genetic_algorithm(chromosome_length, population_size, num_generations, num_parents_mating):
+
+    # PLACE HOLDER. WILL CHANGE THIS TO REPRESENT A RANDOM POKER STRATEGY 
     population = np.random.randint(2, size=(population_size, chromosome_length))
 
     logging.info(f'Initial population:\n{population}')

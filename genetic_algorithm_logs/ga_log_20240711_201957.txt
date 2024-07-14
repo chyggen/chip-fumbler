@@ -1,0 +1,19 @@
+2024-07-11 20:19:57,277 - Initial population:
+[[0 0 1 1 0 0 1 1 1 1]
+ [1 0 0 1 1 0 1 1 0 0]
+ [1 0 0 0 1 1 0 0 1 0]
+ [0 0 0 0 0 1 0 1 1 1]
+ [1 1 1 0 0 1 0 1 0 1]
+ [1 0 1 0 0 0 1 1 0 0]
+ [1 1 0 1 1 1 0 0 0 0]
+ [0 1 0 0 0 1 0 0 1 0]
+ [1 0 1 0 0 0 1 1 0 0]
+ [0 0 1 0 0 0 1 0 0 0]]
+2024-07-11 20:19:57,278 - Initial fitness values: [6, 5, 4, 4, 6, 4, 5, 3, 4, 2]
+
+2024-07-11 20:19:57,278 - The number of parents to select for mating (20) cannot be greater than the number of solutions in the population (10) (i.e., num_parents_mating must always be <= sol_per_pop).
+Traceback (most recent call last):
+  File "C:\Users\benke\AppData\Local\Programs\Python\Python310\lib\site-packages\pygad\pygad.py", line 573, in __init__
+    raise ValueError(f"The number of parents to select for mating ({num_parents_mating}) cannot be greater than the number of solutions in the population ({self.sol_per_pop}) (i.e., num_parents_mating must always be <= sol_per_pop).\n")
+ValueError: The number of parents to select for mating (20) cannot be greater than the number of solutions in the population (10) (i.e., num_parents_mating must always be <= sol_per_pop).
+

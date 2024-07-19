@@ -4,7 +4,8 @@ import itertools
 from typing import Tuple
 from texasholdem.game.game import TexasHoldEm
 
-from agent import Agent
+from agent import Agent, RandomAgent
+from chromosome import Chromosome
 
 
 # define some constants for setting up the game:
@@ -34,20 +35,25 @@ def scoring(method: str, winner: int, game: TexasHoldEm) -> float:
 
 
 def simulation_1v1(
-    A0: Agent, A1: Agent, game_log: bool = False, scoring_method: str = "wins"
+    C0: Chromosome, C1: Chromosome, game_log: bool = False, scoring_method: str = "wins"
 ) -> Tuple[int, float]:
     """Runs a 1v1 simulation between two agents
-
     Args:
-        A1: Agent 1
-        A2: Agent 2
+        C0: chromosome used to make agent 0
+        C1: chromosome used to make agent 1
         game_log: if true, generate a game log
+        scoring_method: string to describe how games are scored. refer to scoring function
 
     Returns:
         A tuple containing: the winner, then a float indicating the
         winner's average chips gained / hand
 
     """
+
+    # TODO: make this actually use real agents and chromosomes when our descision algorithm works
+    A0 = RandomAgent(0)
+    A1 = RandomAgent(1)
+
     game = TexasHoldEm(
         buyin=BUY_IN,
         big_blind=BIG_BLIND,
@@ -72,12 +78,12 @@ def simulation_1v1(
 
 
 def round_robin(
-    agents: list[Agent], cycles: int = 1, scoring_method: str = "wins"
+    chromosomes: list[Chromosome], cycles: int = 1, scoring_method: str = "wins"
 ) -> dict[Agent, float]:
     """Runs a round-robin tournament between a list of agents.
 
     Args:
-        agents: a list of agents to enter into the tournament
+        chromosomes: a list of chromosomes to enter into the tournament
         cycles: how many matches each agent plays against every other agent
         scoring_method: a string specifying how game scores are determined.
 
@@ -86,19 +92,19 @@ def round_robin(
     """
 
     # initialize a dict to store agent scores in
-    scores = {agent: 0 for agent in agents}
+    scores = {chromosome: 0 for chromosome in chromosomes}
 
     # generate all possible agent pairs
-    agent_pairs = list(itertools.combinations(agents, 2))
+    chromosome_pairs = list(itertools.combinations(chromosomes, 2))
 
     for _ in range(cycles):
-        for A0, A1 in agent_pairs:
-            (winner, score) = simulation_1v1(A0, A1, scoring_method=scoring_method)
+        for C0, C1 in chromosome_pairs:
+            (winner, score) = simulation_1v1(C0, C1, scoring_method=scoring_method)
             if winner == 0:
-                scores[A0] += score
-                scores[A1] -= score
+                scores[C0] += score
+                scores[C1] -= score
             else:
-                scores[A0] -= score
-                scores[A1] += score
+                scores[C0] -= score
+                scores[C1] += score
 
     return scores

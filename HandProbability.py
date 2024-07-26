@@ -27,4 +27,3 @@ while game.is_game_running():
 
 game.export_history("./pgns")  # save history
 
-print test

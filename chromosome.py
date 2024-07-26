@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Chromosome:
 
     # An aggressive agent will be more likely to make large bets

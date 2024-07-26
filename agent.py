@@ -5,6 +5,7 @@ from texasholdem.game.action_type import ActionType
 from texasholdem.agents.basic import random_agent
 from texasholdem.game.hand_phase import HandPhase
 from texasholdem.game.action_type import ActionType
+from texasholdem.game.game import Pot
 from chromosome import Chromosome
 
 
@@ -17,31 +18,43 @@ class Agent:
     # Decide the next move based on the game state and the agent's chromosome
     # Returns the action to take, plus a number of chips if the action is a raise
     def action(self, game: TexasHoldEm) -> Tuple[ActionType, Optional[int]]:
-        x1 = 40#from trained bot persentage for flop
+        agesovesThreshold = Chromosome.aggressiveness_preflop#from trained bot persentage for flop
         x2 = 50#for per flop
         x3 = 50#for perhand
         x4 = 50#for river
-        y1 = 60#perobablity of wining for flop
+        propertyOfWin = 60#perobablity of wining for flop
         y2 = 60#for per flop
         y3 = 60#for perhand
         y4 = 60#for river
         raiseAction = 0
-        potSize = 5000
-        chipSize = 1000
+        potSize = Pot.amount # totol pot size
+        for i in player_id_array :
+            chipSize = Pot.get_player_amount(i)
         
         #game state 
-        if game.hand_phase == HandPhase.FLOP:
-            if x1 < y1 <= 75 :
-                #do math based on pot size and persetage to call
-               return  'CHECK'
-            if 75 < y1 <= 100 :
-                #do math based on pot size 
-                raiseAction = potSize/chipSize*2 # temp will need to be changed 
-                return 'RAISE {raiseAction}'
-            else:
-                return 'FOLD' 
-            
         if game.hand_phase == HandPhase.PREFLOP:
+            if game.last_raise == 0:#if it has not been rased 
+                if 50 < propertyOfWin <= 75 :
+                #do math based on pot size and persetage to call
+                    return  ActionType.CHECK
+                if 75 < propertyOfWin <= 100 :#do math based on pot size 
+                    raiseAction = potSize/chipSize*agesovesThreshold # temp will need to be changed 
+                    return (ActionType.RAISE, raiseAction)
+                else:
+                    return ActionType.FOLD 
+            else:
+                if agesovesThreshold < propertyOfWin <= 75 :
+                #do math based on pot size and persetage to call
+                    return ActionType.CALL 
+                if 75 < propertyOfWin <= 100 :
+                    #do math based on pot size 
+                    #if raiseAction > callamouin
+                    raiseAction = potSize/chipSize*2 # temp will need to be changed change to call amount 
+                    return (ActionType.RAISE, raiseAction)
+                else:
+                    return ActionType.FOLD 
+            
+        if game.hand_phase == HandPhase.FLOP:
             #pull matts value 
             if x2 < y2 <= 75 :
                 #do math based on pot size and persetage to call

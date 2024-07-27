@@ -6,15 +6,34 @@
 
 
 from texasholdem.game.game import TexasHoldEm
-from texasholdem.gui.text_gui import TextGUI
+#from texasholdem.gui.text_gui import TextGUI
 from texasholdem.agents.basic import random_agent
 from texasholdem.game.hand_phase import HandPhase 
 from texasholdem import Card
 from texasholdem.evaluator import evaluate, rank_to_string, get_five_card_rank_percentage
 import random
 
-game = TexasHoldEm(buyin=500, big_blind=5, small_blind=2, max_players=6)
-gui = TextGUI(game=game, visible_players=[0])
+#game = TexasHoldEm(buyin=500, big_blind=5, small_blind=2, max_players=6)
+#gui = TextGUI(game=game, visible_players=[0])
+
+
+
+def after_preflop_hand_strength_prob(board_cards, hand):
+    # Get the current board (community) cards
+    #board_cards = game.board
+    board_hand_cards = [Card(str(card)) for card in board_cards]
+
+    # Evaluate the player's hand using the community cards
+    hand_rank = evaluate(cards=hand, board=board_hand_cards)
+    hand_rank_str = rank_to_string(hand_rank)
+
+    # Calculate hand strength probability
+    hand_strength_prob = get_five_card_rank_percentage(hand_rank)
+
+    print(f'TEST!!!!!!!!!!!!!!!!!!!!:{hand_strength_prob}')
+
+    return hand_strength_prob
+
 
 #This will calculate the preflop hand strength based on the number given by this website https://www.raketherake.com/news/2023/05/win-percentage-of-every-poker-starting-hands
 def preflop_evaluate_hand_strength(hand):
@@ -107,7 +126,8 @@ def preflop_evaluate_hand_strength(hand):
 
     ranks = [Card.INT_RANKS.index(card >> 8 & 0xF) for card in hand]
     suited = (hand[0] >> 12 & 0xF) == (hand[1] >> 12 & 0xF)
-    print("Value at hand[0]:", hand[1])
+    print(f'First Card: {hand[0]}')
+    print(f'Second Card: {hand[1]}')
     ranks.sort(reverse=True)
 
     hand_key = (Card.STR_RANKS[ranks[0]], Card.STR_RANKS[ranks[1]], suited)
@@ -116,68 +136,68 @@ def preflop_evaluate_hand_strength(hand):
     return win_rate
 
 
-while game.is_game_running():
-    game.start_hand()
+# while game.is_game_running():
+#     game.start_hand()
 
-    player_hand = game.get_hand(0)  # This takes the hand of Agent 0 or the players hand.
-    #print(f"Your hand: {player_hand}")
+#     player_hand = game.get_hand(0)  # This takes the hand of Agent 0 or the players hand.
+#     #print(f"Your hand: {player_hand}")
 
-    test_hand = [Card(str(card)) for card in player_hand]
-    print(f"Your hand: {test_hand}")
+#     test_hand = [Card(str(card)) for card in player_hand]
+#     print(f"Your hand: {test_hand}")
 
     
-    win_rate = preflop_evaluate_hand_strength(test_hand)
-    print(f"Estimated win rate for your preflop hand: {win_rate:.2f}%")
+#     win_rate = preflop_evaluate_hand_strength(test_hand)
+#     print(f"Estimated win rate for your preflop hand: {win_rate:.2f}%")
 
 
-    while game.is_hand_running():
+#     while game.is_hand_running():
 
-        if game.current_player == 0:
+#         if game.current_player == 0:
 
-            #This checks for the current hand phase
-            if game.hand_phase == HandPhase.FLOP:
+#             #This checks for the current hand phase
+#             if game.hand_phase == HandPhase.FLOP:
 
-                #Take the 3 cards(flop cards) from the board.
-                flop_cards = game.board[:3]
-                flop_cards2 = [Card(str(card)) for card in flop_cards] 
-                print(f"Flop Cards: {flop_cards2}")
+#                 #Take the 3 cards(flop cards) from the board.
+#                 flop_cards = game.board[:3]
+#                 flop_cards2 = [Card(str(card)) for card in flop_cards] 
+#                 print(f"Flop Cards: {flop_cards2}")
 
-                board_cards = game.board
-                board_hand_cards = [Card(str(card)) for card in board_cards]
+#                 board_cards = game.board
+#                 board_hand_cards = [Card(str(card)) for card in board_cards]
 
-                # Evaluate the player's hand using the community cards
-                hand_rank = evaluate(cards=test_hand, board=board_hand_cards)
-                hand_rank_str = rank_to_string(hand_rank)
+#                 # Evaluate the player's hand using the community cards
+#                 hand_rank = evaluate(cards=test_hand, board=board_hand_cards)
+#                 hand_rank_str = rank_to_string(hand_rank)
 
-                # Calculate hand strength probability
-                hand_strength_prob = get_five_card_rank_percentage(hand_rank)
+#                 # Calculate hand strength probability
+#                 hand_strength_prob = get_five_card_rank_percentage(hand_rank)
                 
-                # Display the hand rank and strength probability
-                print(f"Your hand: {test_hand} | Board: {board_cards}")
-                print(f"Hand evaluation: {hand_rank_str}")
-                print(f"PreFlop Hand strength probability: {hand_strength_prob:.2%}")
+#                 # Display the hand rank and strength probability
+#                 print(f"Your hand: {test_hand} | Board: {board_cards}")
+#                 print(f"Hand evaluation: {hand_rank_str}")
+#                 print(f"PreFlop Hand strength probability: {hand_strength_prob:.2%}")
 
-            elif game.hand_phase in [HandPhase.TURN, HandPhase.RIVER, HandPhase.SETTLE]:
-                # Get the current board (community) cards
-                board_cards = game.board
-                board_hand_cards = [Card(str(card)) for card in board_cards]
+#             elif game.hand_phase in [HandPhase.TURN, HandPhase.RIVER, HandPhase.SETTLE]:
+#                 # Get the current board (community) cards
+#                 board_cards = game.board
+#                 board_hand_cards = [Card(str(card)) for card in board_cards]
 
-                # Evaluate the player's hand using the community cards
-                hand_rank = evaluate(cards=test_hand, board=board_hand_cards)
-                hand_rank_str = rank_to_string(hand_rank)
+#                 # Evaluate the player's hand using the community cards
+#                 hand_rank = evaluate(cards=test_hand, board=board_hand_cards)
+#                 hand_rank_str = rank_to_string(hand_rank)
 
-                # Calculate hand strength probability
-                hand_strength_prob = get_five_card_rank_percentage(hand_rank)
+#                 # Calculate hand strength probability
+#                 hand_strength_prob = get_five_card_rank_percentage(hand_rank)
                 
-                # Display the hand rank and strength probability
-                print(f"Your hand: {test_hand} | Board: {board_cards}")
-                print(f"Hand evaluation: {hand_rank_str}")
-                print(f"Hand strength probability: {hand_strength_prob:.2%}")
+#                 # Display the hand rank and strength probability
+#                 print(f"Your hand: {test_hand} | Board: {board_cards}")
+#                 print(f"Hand evaluation: {hand_rank_str}")
+#                 print(f"Hand strength probability: {hand_strength_prob:.2%}")
 
-            gui.run_step()
-        else:
-            gui.display_state()
-            game.take_action(*random_agent(game))
-            gui.display_action()
+#             # gui.run_step()
+#         else:
+#             # gui.display_state()
+#             game.take_action(*random_agent(game))
+#             # gui.display_action()
 
-    gui.display_win()
+#     # gui.display_win()

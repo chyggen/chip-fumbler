@@ -4,7 +4,7 @@ import itertools
 from typing import Tuple
 from texasholdem.game.game import TexasHoldEm
 
-from agent import Agent, RandomAgent
+from agent import RandomAgent, Agent
 from chromosome import Chromosome
 
 
@@ -51,8 +51,11 @@ def simulation_1v1(
     """
 
     # TODO: make this actually use real agents and chromosomes when our descision algorithm works
-    A0 = RandomAgent(0)
-    A1 = RandomAgent(1)
+    # A0 = RandomAgent(0)
+    # A1 = RandomAgent(1)
+
+    A0 = Agent(player_id=0, chromosome=C0)
+    A1 = Agent(player_id=1, chromosome=C1)
 
     game = TexasHoldEm(
         buyin=BUY_IN,
@@ -79,7 +82,7 @@ def simulation_1v1(
 
 def round_robin(
     chromosomes: list[Chromosome], cycles: int = 1, scoring_method: str = "wins"
-) -> dict[Agent, float]:
+) -> dict[Chromosome, float]:
     """Runs a round-robin tournament between a list of agents.
 
     Args:

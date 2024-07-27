@@ -1,0 +1,13 @@
+{
+    "aggressiveness_preflop": 0.692,
+    "aggressiveness_flop": 0.88,
+    "aggressiveness_turn": 0.926,
+    "aggressiveness_river": 0.337,
+    "bluff_probability_preflop": 0.367,
+    "bluff_probability_flop": 0.99,
+    "bluff_probability_turn": 0.969,
+    "bluff_probability_river": 0.603,
+    "tightness_vs_looseness": 0.135,
+    "dynamic_vs_static": 0.573,
+    "bet_size_variability": 0.605
+}

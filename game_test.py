@@ -10,7 +10,7 @@ def main():
     print("Chromosome 2:", chromosome2)
 
     # Run a 1v1 simulation
-    winner, score = simulation_1v1(chromosome1, chromosome2, game_log=True, scoring_method="wins")
+    winner, score = simulation_1v1(chromosome1, chromosome2, game_log=False, scoring_method="wins")
 
     # Output the results
     print(f"Winner: {'Agent 1' if winner == 0 else 'Agent 2'} - Score: {score}")

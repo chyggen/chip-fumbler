@@ -7,11 +7,19 @@ from texasholdem.game.game import TexasHoldEm
 from agent import RandomAgent, Agent
 from chromosome import Chromosome
 
+from texasholdem import TexasHoldEm, HandPhase, ActionType
+
+import concurrent.futures
+from typing import List
+from joblib import Parallel, delayed
+
+
+
 
 # define some constants for setting up the game:
 BUY_IN = 500
-BIG_BLIND = 5
-SMALL_BLIND = 0
+BIG_BLIND = 50
+SMALL_BLIND = 25
 MAX_PLAYERS = 2
 
 
@@ -54,8 +62,8 @@ def simulation_1v1(
     # A0 = RandomAgent(0)
     # A1 = RandomAgent(1)
 
-    A0 = Agent(player_id=0, chromosome=C0)
-    A1 = Agent(player_id=1, chromosome=C1)
+    A0 = Agent(chromosome=C0)
+    A1 = Agent(chromosome=C1)
 
     game = TexasHoldEm(
         buyin=BUY_IN,
@@ -67,14 +75,14 @@ def simulation_1v1(
         game.start_hand()
         while game.is_hand_running():
             if game.current_player == 0:
-                game.take_action(*A0.action(game))
+                game.take_action(A0.action(game))
+            elif game.current_player == 1:
+                game.take_action(A1.action(game))
             else:
-                game.take_action(*A1.action(game))
+                print("Unexpected player turn.")
         if game_log:
             game.export_history("./pgns")  # save history
 
-    # When we arrive here, the game is over.
-    # We can determine who won by checking the active players in the pot:
     winner = list(game.in_pot_iter(game.btn_loc + 1))[0]
     score = scoring(method=scoring_method, winner=winner, game=game)
     return (winner, score)
@@ -82,7 +90,7 @@ def simulation_1v1(
 
 def round_robin(
     chromosomes: list[Chromosome], cycles: int = 1, scoring_method: str = "wins"
-) -> dict[Chromosome, float]:
+) -> list[float]:
     """Runs a round-robin tournament between a list of agents.
 
     Args:
@@ -93,21 +101,41 @@ def round_robin(
     Returns:
         a dict containing a score for each agent.
     """
-
-    # initialize a dict to store agent scores in
-    scores = {chromosome: 0 for chromosome in chromosomes}
-
-    # generate all possible agent pairs
-    chromosome_pairs = list(itertools.combinations(chromosomes, 2))
+    scores = [0 for _ in range(len(chromosomes))]
+    
+    chromosome_indecies = [i for i in range(len(chromosomes))]
+    chromosome_index_pairs = list(itertools.combinations(chromosome_indecies, 2))
 
     for _ in range(cycles):
-        for C0, C1 in chromosome_pairs:
+        for I0, I1 in chromosome_index_pairs:
+            C0 = chromosomes[I0]
+            C1 = chromosomes[I1]
             (winner, score) = simulation_1v1(C0, C1, scoring_method=scoring_method)
             if winner == 0:
-                scores[C0] += score
-                scores[C1] -= score
+                scores[I0] += score
+                scores[I1] -= score
             else:
-                scores[C0] -= score
-                scores[C1] += score
+                scores[I1] += score
+                scores[I0] -= score
 
     return scores
+
+def play_matches(
+    chromosomes: List[Chromosome], target_idx: int, cycles: int = 1, scoring_method: str = "wins", n_jobs: int = -1
+) -> float:
+    C0 = chromosomes[target_idx]
+    
+    def play_single_match(C0: Chromosome, opponent: Chromosome) -> float:
+        (winner, score) = simulation_1v1(C0, opponent, scoring_method=scoring_method)
+        return score if winner == 0 else 0
+    
+    all_scores = Parallel(n_jobs=n_jobs)(
+        delayed(play_single_match)(C0, opponent)
+        for _ in range(cycles)
+        for index, opponent in enumerate(chromosomes) if index != target_idx
+    )
+    
+    final_score = sum(all_scores)
+    return final_score
+            
+    

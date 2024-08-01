@@ -29,9 +29,6 @@ def after_preflop_hand_strength_prob(board_cards, hand):
 
     # Calculate hand strength probability
     hand_strength_prob = get_five_card_rank_percentage(hand_rank)
-
-    print(f'TEST!!!!!!!!!!!!!!!!!!!!:{hand_strength_prob}')
-
     return hand_strength_prob
 
 
@@ -126,8 +123,7 @@ def preflop_evaluate_hand_strength(hand):
 
     ranks = [Card.INT_RANKS.index(card >> 8 & 0xF) for card in hand]
     suited = (hand[0] >> 12 & 0xF) == (hand[1] >> 12 & 0xF)
-    print(f'First Card: {hand[0]}')
-    print(f'Second Card: {hand[1]}')
+    #print(f'Hand: {hand[0]}, {hand[1]}')
     ranks.sort(reverse=True)
 
     hand_key = (Card.STR_RANKS[ranks[0]], Card.STR_RANKS[ranks[1]], suited)

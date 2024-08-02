@@ -3,6 +3,7 @@ from math import exp
 import random
 import time
 from pprint import pprint
+import logging
 
 from texasholdem.game.game import TexasHoldEm
 from texasholdem.game.action_type import ActionType
@@ -38,26 +39,26 @@ def is_bluffing(percentage):
 def want_to_raise(desired_raise: int, min_raise: int, max_raise: int, available_moves) -> Tuple[ActionType, Optional[int]]:
         
     # Desired raise is greater than our total chip amount
-    if desired_raise >= max_raise:
-        #print(f"tried to raise {desired_raise}, going ALL IN: {max_raise}")
-        return ActionType.ALL_IN
+    if desired_raise >= max_raise and ActionType.RAISE in available_moves:
+        logging.debug(f"tried to raise {desired_raise}, going ALL IN: {max_raise}")
+        return (ActionType.ALL_IN, None)
         
     # Desired raise is less than our minimum possible raise
-    elif desired_raise < min_raise:
+    elif desired_raise < min_raise or ActionType.RAISE not in available_moves:
         if ActionType.CALL in available_moves:
-            #print(f"cant raise {desired_raise}, CALLING")
-            return ActionType.CALL
+            logging.debug(f"cant raise {desired_raise}, CALLING")
+            return (ActionType.CALL, None)
         elif ActionType.CHECK in available_moves:
-            #print(f"cant raise {desired_raise}, CHECKING")
-            return ActionType.CHECK
+            logging.debug(f"cant raise {desired_raise}, CHECKING")
+            return (ActionType.CHECK, None)
         else: 
             raise RuntimeError("WTF cant call or check")
         
     # Desired raise is less than our total chip amount AND is more than our minimum possibile raise
     else:
-        #print(f"RAISING: {desired_raise}")
+        logging.debug(f"RAISING: {desired_raise}")
         return ActionType.RAISE, desired_raise
-        # #print("RAISE")
+        # logging.debug("RAISE")
         # return (ActionType.RAISE, 100)
 
 class Agent:
@@ -68,25 +69,27 @@ class Agent:
     
     # Decide the next move based on the game state and the agent's chromosome
     # Returns the action to take, plus a number of chips if the action is a raise
-    def action(self, game: TexasHoldEm) -> Tuple[ActionType, Optional[int]]:
+    def action(self, game: TexasHoldEm, debug: bool = True) -> Tuple[ActionType, Optional[int]]:
 
+        log_level = logging.DEBUG if debug else logging.INFO
+        logging.basicConfig(filename = "test.log", level=log_level, format='\n %(message)s')
         #time.sleep(1)
 
         # game_phase is the stage of the game (PREFLOP, FLOP, TURN, RIVER)
         game_phase = game.hand_phase
         potSize = game.pots[0].get_total_amount()
-        #print(potSize)
+        logging.debug(potSize)
         raiseAction = 0
 
-        #print('\n\n\n')
+        logging.debug('\n\n\n')
 
-        # p#print(vars(game))
+        # logging.debug(vars(game))
 
-        #print(f'CURRENT GAME PHASE: {game_phase}')
-        #print(f"PLAYER {game.current_player}'s TURN")
-        #print(f"HAND {game.get_hand(game.current_player)}")
-        #print(f"BOARD {game.board}")
-        #print(f"AVAILABLE MOVES {game.get_available_moves()}")
+        logging.debug(f'CURRENT GAME PHASE: {game_phase}')
+        logging.debug(f"PLAYER {game.current_player}'s TURN")
+        logging.debug(f"HAND {game.get_hand(game.current_player)}")
+        logging.debug(f"BOARD {game.board}")
+        logging.debug(f"AVAILABLE MOVES {game.get_available_moves()}")
         
         # game.get_hand(game.current_player)
         # hand[0], hand[1]
@@ -108,7 +111,7 @@ class Agent:
         # tightness_vs_looseness = self.chromosome.tightness_vs_looseness
         # dynamic_vs_static = self.chromosome.dynamic_vs_static
         
-        # #print(self.chromosome)
+        # logging.debug(self.chromosome)
 
         # Extracting parameters based on the current game phase
         aggressiveness = {
@@ -147,14 +150,14 @@ class Agent:
         
         EV1 = estimated_value(win_percentage, potSize, to_lose)
 
-        #print(f'Total chip size size: {chipSize}')
-        #print(f'HAND STRENGTH: {hand_strength}')
-        #print(f'PERCEIVED WIN%: {win_percentage}')
-        #print(f"POT SIZE: {potSize}")
-        #print(f"POTS : {game.pots}")
-        #print(f"MIN RAISE: {game.min_raise()}")
-        #print(f'TO LOSE: {to_lose}')
-        #print(f'EV1: {EV1}')
+        logging.debug(f'Total chip size size: {chipSize}')
+        logging.debug(f'HAND STRENGTH: {hand_strength}')
+        logging.debug(f'PERCEIVED WIN%: {win_percentage}')
+        logging.debug(f"POT SIZE: {potSize}")
+        logging.debug(f"POTS : {game.pots}")
+        logging.debug(f"MIN RAISE: {game.min_raise()}")
+        logging.debug(f'TO LOSE: {to_lose}')
+        logging.debug(f'EV1: {EV1}')
         
     
         
@@ -170,14 +173,17 @@ class Agent:
                 # Check if the current phase is PREFLOP and handle the edge case
                 if game_phase == HandPhase.PREFLOP:
                     if ActionType.CALL in game.get_available_moves():
-                        #print("Edge Case PREFLOP: Calling instead of raising")
-                        move = ActionType.CALL
+                        logging.debug("Edge Case PREFLOP: Calling instead of raising")
+                        move = (ActionType.CALL, None)
+
                     elif ActionType.CHECK in game.get_available_moves():
-                        #print("Edge Case PREFLOP: Checking instead of raising")
-                        move = ActionType.CHECK
+                        logging.debug("Edge Case PREFLOP: Checking instead of raising")
+                        move = (ActionType.CHECK, None)
+
                     else:
-                        #print("Edge Case PREFLOP: Folding")
-                        move = ActionType.FOLD
+                        logging.debug("Edge Case PREFLOP: Folding")
+                        move = (ActionType.FOLD, None)
+
                 else:
                     move = want_to_raise(raise_val_bluff, game.min_raise(), chipSize, game.get_available_moves())
 
@@ -185,77 +191,86 @@ class Agent:
                 """WE ARE NOT BLUFFING"""
                 # In the event that the player does not want to bluff, check/fold.
                 if ActionType.CHECK in game.get_available_moves():
-                    #print("CHECKING")
-                    move = ActionType.CHECK
+                    logging.debug("CHECKING")
+                    move = (ActionType.CHECK, None)
+
                 else:
-                    ##print("FOLDING")
-                    move = ActionType.FOLD
+                    #logging.debug("FOLDING")
+                    move = (ActionType.FOLD, None)
+
         
         else:
             """GOOD HAND"""
             # Positive EV value
             new_lose = (2 / 3) * potSize
-            if new_lose >= chipSize:
-                #print(f"ALL IN {chipSize}")
-                move = ActionType.ALL_IN
-            else:
-                EV2 = estimated_value(win_percentage, potSize, new_lose)
-                #print(f"EV2: {EV2}")
+            # if new_lose >= chipSize:
+            #     logging.debug(f"ALL IN {chipSize}")
+            #     move = (ActionType.ALL_IN, None)
+            # else:
+            EV2 = estimated_value(win_percentage, potSize, new_lose)
+            logging.debug(f"EV2: {EV2}")
 
-                EV2_with_aggressiveness = EV2 * (2 * aggressiveness)
+            EV2_with_aggressiveness = EV2 * (2 * aggressiveness)
 
-                if EV2_with_aggressiveness < 0:
-                    if ActionType.CHECK in game.get_available_moves():
-                        #print("CHECKING")
-                        move = ActionType.CHECK
-                    else:
-                        #print(f"CALLING")
-                        move = ActionType.CALL
+            if EV2_with_aggressiveness < 0:
+                if ActionType.CHECK in game.get_available_moves():
+                    logging.debug("CHECKING")
+                    move = (ActionType.CHECK, None)
+
                 else:
-                    if EV2_with_aggressiveness <= 2:
-                        raiseAction = int(potSize * 2)
-                    elif 2 < EV2_with_aggressiveness <= 5:
-                        raiseAction = int(potSize * 3)
-                    elif EV2_with_aggressiveness > 10:
-                        raiseAction = int(potSize * 4)
-                    
-                    # Check if the current phase is PREFLOP and handle the edge case
-                    if game_phase == HandPhase.PREFLOP:
-                        if ActionType.CALL in game.get_available_moves():
-                            #print("Edge Case PREFLOP: Calling instead of raising")
-                            move = ActionType.CALL
-                        elif ActionType.CHECK in game.get_available_moves():
-                            #print("Edge Case PREFLOP: Checking instead of raising")
-                            move = ActionType.CHECK
-                        else:
-                            #print("Edge Case PREFLOP: Folding")
-                            move = ActionType.FOLD
+                    logging.debug(f"CALLING")
+                    move = (ActionType.CALL, None)
+
+            else:
+                if EV2_with_aggressiveness <= 2:
+                    raiseAction = int(potSize * 2)
+                elif 2 < EV2_with_aggressiveness <= 5:
+                    raiseAction = int(potSize * 3)
+                elif EV2_with_aggressiveness > 10:
+                    raiseAction = int(potSize * 4)
+                
+                # Check if the current phase is PREFLOP and handle the edge case
+                if game_phase == HandPhase.PREFLOP:
+                    if ActionType.CALL in game.get_available_moves():
+                        logging.debug("Edge Case PREFLOP: Calling instead of raising")
+                        move = (ActionType.CALL, None)
+
+                    elif ActionType.CHECK in game.get_available_moves():
+                        logging.debug("Edge Case PREFLOP: Checking instead of raising")
+                        move = (ActionType.CHECK, None)
+
                     else:
-                        move = want_to_raise(raiseAction, game.min_raise(), chipSize, game.get_available_moves())
+                        logging.debug("Edge Case PREFLOP: Folding")
+                        move = (ActionType.FOLD, None)
+
+                else:
+                    move = want_to_raise(raiseAction, game.min_raise(), chipSize, game.get_available_moves())
                     
-        #print(f"move: {move}, type: {type(move)}")
-        #print(f"valid? {game.validate_move(game.current_player, move)}")
+        logging.debug(f"move: {move}, type: {type(move)}")
+        logging.debug(f"valid? {game.validate_move(game.current_player, move)}")
+        # if not game.validate_move(game.current_player, move):
+        # print(f"WARNING: {move} is not a valid move, options are {game.get_available_moves()}")
 
         return move
 
             # if raiseAction > chipSize:
-            #     #print(f"going all in with {chipSize} chips, tried to raise {raiseAction} ")
-            #     #print(f"ALL IN {chipSize}")
+            #     logging.debug(f"going all in with {chipSize} chips, tried to raise {raiseAction} ")
+            #     logging.debug(f"ALL IN {chipSize}")
             #     return ActionType.ALL_IN
             
             # if raiseAction < game.min_raise():
             #     if (ActionType.CHECK in game.get_available_moves()):
-            #         #print("CHECKING")
+            #         logging.debug("CHECKING")
             #         return ActionType.CHECK
             #     else:
-            #         #print("CALLING")
+            #         logging.debug("CALLING")
             #         return ActionType.CALL
                     
             
             # game.min_raise()
             # game.chips_to_call(game.current_player)
 
-            # #print(f'RAISING WITH: {raiseAction}')
+            # logging.debug(f'RAISING WITH: {raiseAction}')
 
             # return (ActionType.RAISE, raiseAction)
 

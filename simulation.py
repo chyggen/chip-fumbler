@@ -58,10 +58,6 @@ def simulation_1v1(
 
     """
 
-    # TODO: make this actually use real agents and chromosomes when our descision algorithm works
-    # A0 = RandomAgent(0)
-    # A1 = RandomAgent(1)
-
     A0 = Agent(chromosome=C0)
     A1 = Agent(chromosome=C1)
 
@@ -74,12 +70,16 @@ def simulation_1v1(
     while game.is_game_running():
         game.start_hand()
         while game.is_hand_running():
+            action: ActionType
+            value: int 
             if game.current_player == 0:
-                game.take_action(A0.action(game))
+                (action,value) = A0.action(game, True)
             elif game.current_player == 1:
-                game.take_action(A1.action(game))
+                (action,value) = A1.action(game, True)
             else:
                 print("Unexpected player turn.")
+
+            game.take_action(action,value)
         if game_log:
             game.export_history("./pgns")  # save history
 
@@ -127,15 +127,23 @@ def play_matches(
     
     def play_single_match(C0: Chromosome, opponent: Chromosome) -> float:
         (winner, score) = simulation_1v1(C0, opponent, scoring_method=scoring_method)
-        return score if winner == 0 else 0
+        return score if winner == 0 else -score
     
     all_scores = Parallel(n_jobs=n_jobs)(
         delayed(play_single_match)(C0, opponent)
         for _ in range(cycles)
         for index, opponent in enumerate(chromosomes) if index != target_idx
     )
-    
     final_score = sum(all_scores)
+
+    # final_score = 0
+    # for index, opponent in enumerate(chromosomes):
+    #     if index != target_idx:
+    #         (winner, score) = simulation_1v1(C0, opponent, scoring_method=scoring_method)
+    #         if winner == 0:
+    #             final_score += score
+    
+    
     return final_score
             
     

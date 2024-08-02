@@ -39,7 +39,7 @@ def fitness_function(ga_instance, solution, solution_idx):
     ) for c in ga_instance.population]
 
     #score = ga_instance.score_cache[solution_idx]
-    score = play_matches(chromosomes, solution_idx)
+    score = play_matches(chromosomes, solution_idx, scoring_method="chips per hand")
     #logging.info(f'SOLUTION INDEX: {solution_idx}, SCORE: {score}')
 
     logging.info(f'SOLUTION: {solution}, SCORE: {score}')
@@ -197,6 +197,11 @@ def run_genetic_algorithm(chromosome_length, population_size, num_generations, n
 
      # Retrieve and log the best solution
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
+
+    solution_idx = ga_instance.last_generation_fitness.argmax()
+    solution = ga_instance.population[solution_idx]
+    solution_fitness = ga_instance.last_generation_fitness[solution_idx]
+
     logging.info(f'Best solution: {solution}')
     logging.info(f'Best solution fitness: {solution_fitness}')
     logging.info(f'Best solution index: {solution_idx}')

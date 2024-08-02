@@ -28,7 +28,7 @@ def after_preflop_hand_strength_prob(board_cards, hand):
     hand_rank_str = rank_to_string(hand_rank)
 
     # Calculate hand strength probability
-    hand_strength_prob = get_five_card_rank_percentage(hand_rank)
+    hand_strength_prob = 100 * get_five_card_rank_percentage(hand_rank)
     return hand_strength_prob
 
 

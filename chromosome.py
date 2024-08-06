@@ -72,10 +72,20 @@ class Chromosome:
         with filepath.open('w') as f:
             json.dump(asdict(self), f, indent=4)
 
-# Example usage
-# Generate a random chromosome
-chromosome = Chromosome.random()
-
-# Save the chromosome to a file in the "chromosomes" folder
-directory = Path('chromosomes')
-chromosome.to_file(directory)
+    @staticmethod
+    def from_file(file: Path):
+        f = open(file)
+        data = json.load(f)
+        return Chromosome(
+            aggressiveness_preflop=data["aggressiveness_preflop"],
+            aggressiveness_flop=data["aggressiveness_flop"],
+            aggressiveness_turn=data["aggressiveness_turn"],
+            aggressiveness_river=data["aggressiveness_river"],
+            bluff_probability_preflop=data["bluff_probability_preflop"],
+            bluff_probability_flop=data["bluff_probability_flop"],
+            bluff_probability_turn=data["bluff_probability_turn"],
+            bluff_probability_river=data["bluff_probability_river"],
+            tightness_vs_looseness=data["tightness_vs_looseness"],
+            dynamic_vs_static=data["dynamic_vs_static"],
+            bet_size_variability=data["bet_size_variability"],
+        ) 

@@ -89,11 +89,3 @@ class Chromosome:
             dynamic_vs_static=data["dynamic_vs_static"],
             bet_size_variability=data["bet_size_variability"],
         ) 
-
-# # Example usage
-# # Generate a random chromosome
-# chromosome = Chromosome.random()
-
-# # Save the chromosome to a file in the "chromosomes" folder
-# directory = Path('chromosomes')
-# chromosome.to_file(directory)

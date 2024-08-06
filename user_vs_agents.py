@@ -30,8 +30,7 @@ def run_game(chromosome: Chromosome):
         while game.is_hand_running():
             if game.current_player == 0:
                 gui.run_step()
-                # (move, value) = opponent.action(game, True)
-                # game.take_action(move,value)
+
             else:
                 gui.display_state()
                 sleep(1)
@@ -54,10 +53,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     chromosome_path = Path("chromosomes") / f"{args.file}.json" 
-    # print(chromosome_path)
     chromosome = Chromosome.from_file(chromosome_path)
-    # pprint(vars(chromosome))
     run_game(chromosome)
 
-    #Chromosome(0.478, 0.565, 0.271, 0.621, 0.761, 0.904, 0.116, 0.22,  0.297, 0.668, 0.029)
   

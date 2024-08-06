@@ -136,14 +136,6 @@ def play_matches(
     )
     final_score = sum(all_scores)
 
-    # final_score = 0
-    # for index, opponent in enumerate(chromosomes):
-    #     if index != target_idx:
-    #         (winner, score) = simulation_1v1(C0, opponent, scoring_method=scoring_method)
-    #         if winner == 0:
-    #             final_score += score
-    
-    
     return final_score
             
     
